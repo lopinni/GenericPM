@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        
+        <title> GenericPM </title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="css/spectre.min.css">
+        
+    </head>
+    <body>
+        
+        <div class="container">
+            
+            <div class="hero-sm bg-secondary">
+                <div class="hero-body">
+                    <div class="text-center">
+                        <div class="divider text-center"> </div>
+                        <h1> Welcome to a generic password manager. </h1>
+                        <div class="divider text-center"
+                            data-content="&#169; Maciej Sójka 2021"> </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="columns">
+                <div class="column">
+                    <div class="text-center">
+                        <h3> Login </h3>
+                    </div>
+
+                    <form th:action="@{/login}" th:object="${user}" method="post">
+                        <div class="form-group">                  
+                            <div class="input-group" style="padding-top:10px;">
+                                <span class="input-group-addon"> Username </span>        
+                                <input class="form-input"
+                                        type="text"
+                                        id="login-username"
+                                        name="login-username"
+                                       th:field="*{login}">
+                            </div>
+                            <div class="input-group" style="padding-top:10px;">
+                                <span class="input-group-addon"> Password </span> 
+                                <input class="form-input" 
+                                        type="password" 
+                                        id="login-password"
+                                        name="login-password"
+                                       th:field="*{acc_pass}">
+                                <input class="btn" type="submit" value="Login">
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="divider text-center"> </div>
+                    
+                    <div class="text-center">
+                        <h3> Forgot password? </h3>
+                    </div>
+
+                    <form th:action="@{/reset}" th:object="${user}" method="post">
+                        <div class="form-group">                  
+                            <div class="input-group" style="padding-top:10px;">
+                                <span class="input-group-addon"> Username </span>        
+                                <input class="form-input"
+                                        type="text"
+                                        id="reset-username"
+                                        name="reset-username"
+                                       th:field="*{login}">
+                            </div>
+                            <div class="input-group" style="padding-top:10px;">
+                                <span class="input-group-addon"> Password </span> 
+                                <input class="form-input" 
+                                        type="password" 
+                                        id="reset-password"
+                                        name="reset-password"
+                                       th:field="*{acc_pass}">
+                                <input class="btn" type="submit" value="Reset">
+                            </div>
+                        </div>
+                    </form>
+                    
+                </div>
+                <div class="divider-vert" data-content="OR"> </div>
+                <div class="column">
+                    <div class="text-center">
+                        <h3> Register </h3>
+                    </div>
+                    
+                    <form th:action="@{/register}" th:object="${user}" method="post">
+                        <div class="form-group">
+                            <label class="form-label" for="register-username">
+                                Username </label>
+                            <input class="form-input" type="text"
+                                   id="register-username"
+                                   name="register-username"
+                                   th:field="*{login}">
+                            <label class="form-label" for="register-password">
+                                Password </label>
+                            <input class="form-input" type="password" 
+                                   id="register-password"
+                                   name="register-password"
+                                   th:field="*{acc_pass}">
+                            <label class="form-label">
+                                Select password encoding method: </label>
+                            <label class="form-radio form-inline">
+                                <input type="radio" value="aes" name="radio" th:field="*{method}" checked>
+                                <i class="form-icon"> </i> AES
+                            </label>
+                            <label class="form-radio form-inline">
+                                <input type="radio" value="hmac" name="radio" th:field="*{method}">
+                                <i class="form-icon"> </i> HMAC
+                            </label>
+                        </div>
+                        <input class="btn" type="submit" value="Register">
+                    </form>
+                    
+                </div>
+            </div>
+            
+        </div>
+        
+    </body>
+</html>
