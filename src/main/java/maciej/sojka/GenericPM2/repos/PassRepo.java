@@ -1,5 +1,6 @@
-package maciej.sojka.GenericPM2.entities;
+package maciej.sojka.GenericPM2.repos;
 
+import maciej.sojka.GenericPM2.entities.Password;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

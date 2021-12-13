@@ -1,9 +1,9 @@
 package maciej.sojka.GenericPM2;
 
-import maciej.sojka.GenericPM2.entities.PassRepo;
+import maciej.sojka.GenericPM2.repos.PassRepo;
 import maciej.sojka.GenericPM2.entities.Password;
 import maciej.sojka.GenericPM2.entities.User;
-import maciej.sojka.GenericPM2.entities.UserRepo;
+import maciej.sojka.GenericPM2.repos.UserRepo;
 import maciej.sojka.GenericPM2.misc.CryptoFunc;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.annotation.PostConstruct;
-import java.util.Properties;
 
 @SpringBootApplication
 public class GenericPm2Application {

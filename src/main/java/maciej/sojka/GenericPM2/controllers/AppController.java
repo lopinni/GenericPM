@@ -1,9 +1,9 @@
 package maciej.sojka.GenericPM2.controllers;
 
-import maciej.sojka.GenericPM2.entities.PassRepo;
+import maciej.sojka.GenericPM2.repos.PassRepo;
 import maciej.sojka.GenericPM2.entities.Password;
 import maciej.sojka.GenericPM2.entities.User;
-import maciej.sojka.GenericPM2.entities.UserRepo;
+import maciej.sojka.GenericPM2.repos.UserRepo;
 import maciej.sojka.GenericPM2.misc.CryptoFunc;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-
-import java.util.Optional;
 
 @Controller
 public class AppController {
@@ -52,7 +50,7 @@ public class AppController {
 
     @PostMapping("/login")
     public String loginUser(User u, Model m) throws Exception {
-        String formPass = "";
+        String formPass;
         User DBuser = userRepo.findByLogin(u.getLogin());
         if(DBuser != null) {
             if (DBuser.getMethod().equals("aes")) {
