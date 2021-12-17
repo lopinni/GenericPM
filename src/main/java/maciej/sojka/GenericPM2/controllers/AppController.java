@@ -1,25 +1,53 @@
 package maciej.sojka.GenericPM2.controllers;
 
+import maciej.sojka.GenericPM2.entities.*;
+import maciej.sojka.GenericPM2.repos.IPLRepo;
 import maciej.sojka.GenericPM2.repos.PassRepo;
-import maciej.sojka.GenericPM2.entities.Password;
-import maciej.sojka.GenericPM2.entities.User;
+import maciej.sojka.GenericPM2.repos.ULRepo;
 import maciej.sojka.GenericPM2.repos.UserRepo;
 import maciej.sojka.GenericPM2.misc.CryptoFunc;
+
 import net.bytebuddy.utility.RandomString;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Controller
 public class AppController {
 
     @Autowired
     private UserRepo userRepo;
-
     @Autowired
     private PassRepo passRepo;
+    @Autowired
+    private IPLRepo iplRepo;
+    @Autowired
+    private ULRepo ulRepo;
+
+    public String loginError(Model m, String userLogin, HttpServletRequest request) {
+        ulRepo.save(new UserLogin(userLogin,false));
+        iplRepo.save(new IPLogin(request.getRemoteAddr(),false));
+        m.addAttribute("numberOfFails", ulRepo.getNumberOfFails(userLogin));
+        m.addAttribute("numberOfFailsIP", iplRepo.getNumberOfFails(request.getRemoteAddr()));
+        return "loginError";
+    }
+
+    public String enter(Model m, User u, HttpServletRequest request) {
+        ulRepo.save(new UserLogin(u.getLogin(),true));
+        iplRepo.save(new IPLogin(request.getRemoteAddr(),true));
+        m.addAttribute("passwords", passRepo.findAllByUserId(u.getId()));
+        m.addAttribute("newpass", new Password(u.getId()));
+        m.addAttribute("lastSuccess", ulRepo.getLastSuccess());
+        m.addAttribute("lastFail", ulRepo.getLastFail());
+        m.addAttribute("numberOfFails", ulRepo.getNumberOfFails(u.getLogin()));
+        m.addAttribute("ipLoginAttempts", iplRepo.findAll());
+        return "welcome";
+    }
 
     @GetMapping("")
     public String home(Model model) {
@@ -28,7 +56,7 @@ public class AppController {
     }
 
     @PostMapping("/register")
-    public String registerUser(User u, Model m) throws Exception {
+    public String registerUser(User u, Model m, HttpServletRequest request) throws Exception {
         String salt = RandomString.make(64);
         u.setSalt(salt);
         if(u.getMethod().equals("aes")){
@@ -43,13 +71,34 @@ public class AppController {
                                                     CryptoFunc.PEPPER));
         }
         userRepo.save(u);
-        m.addAttribute("passwords", passRepo.findAllByUserId(u.getId()));
-        m.addAttribute("newpass", new Password(u.getId()));
-        return "welcome";
+        return enter(m, u, request);
+    }
+
+    @PostMapping("/reset")
+    public String resetMasterPassword(User u, Model m, HttpServletRequest r) throws Exception {
+        String salt = RandomString.make(64);
+        User DBuser = userRepo.findByLogin(u.getLogin());
+        if(DBuser != null) {
+            if (DBuser.getMethod().equals("aes")) {
+                DBuser.setAcc_pass(
+                        CryptoFunc.encrypt(
+                                CryptoFunc.calculateSHA512(
+                                        u.getAcc_pass() + salt),
+                                CryptoFunc.generateKey(CryptoFunc.PEPPER)));
+            } else {
+                DBuser.setAcc_pass(
+                        CryptoFunc.calculateHMAC(
+                                CryptoFunc.calculateSHA512(
+                                        u.getAcc_pass() + salt), CryptoFunc.PEPPER));
+            }
+            DBuser.setSalt(salt);
+        } else return loginError(m, u.getLogin(), r);
+        userRepo.save(DBuser);
+        return enter(m, DBuser, r);
     }
 
     @PostMapping("/login")
-    public String loginUser(User u, Model m) throws Exception {
+    public String loginUser(User u, Model m, HttpServletRequest request) throws Exception {
         String formPass;
         User DBuser = userRepo.findByLogin(u.getLogin());
         if(DBuser != null) {
@@ -64,45 +113,25 @@ public class AppController {
                                                 u.getAcc_pass() + DBuser.getSalt()),
                                                     CryptoFunc.PEPPER);
             }
-            if(!formPass.equals(DBuser.getAcc_pass())) return "loginError";
-        } else return "loginError";
-        m.addAttribute("passwords", passRepo.findAllByUserId(DBuser.getId()));
-        m.addAttribute("newpass", new Password(DBuser.getId()));
-        return "welcome";
-    }
-
-    @PostMapping("/reset")
-    public String resetMasterPassword(User u, Model m) throws Exception {
-        String salt = RandomString.make(64);
-        User DBuser = userRepo.findByLogin(u.getLogin());
-        if(DBuser != null) {
-            if (DBuser.getMethod().equals("aes")) {
-                DBuser.setAcc_pass(
-                        CryptoFunc.encrypt(
-                                    CryptoFunc.calculateSHA512(
-                                            u.getAcc_pass() + salt),
-                                                CryptoFunc.generateKey(CryptoFunc.PEPPER)));
-            } else {
-                DBuser.setAcc_pass(
-                        CryptoFunc.calculateHMAC(
-                                    CryptoFunc.calculateSHA512(
-                                            u.getAcc_pass() + salt), CryptoFunc.PEPPER));
-            }
-            DBuser.setSalt(salt);
-        } else return "loginError";
-        userRepo.save(DBuser);
-        m.addAttribute("passwords", passRepo.findAllByUserId(DBuser.getId()));
-        m.addAttribute("newpass", new Password(DBuser.getId()));
-        return "welcome";
+            if(!formPass.equals(DBuser.getAcc_pass())) return loginError(m, u.getLogin(), request);
+        } else return loginError(m, u.getLogin(), request);
+        ulRepo.save(new UserLogin(u.getLogin(),true));
+        iplRepo.save(new IPLogin(request.getRemoteAddr(),true));
+        return enter(m, DBuser, request);
     }
 
     @PostMapping("/password")
-    public String setPassword(Password p, Model m) {
+    public String setPassword(Password p, Model m, HttpServletRequest request) {
         passRepo.save(p);
         User DBuser = userRepo.findByIdAlt(p.getId_user());
-        m.addAttribute("passwords", passRepo.findAllByUserId(DBuser.getId()));
-        m.addAttribute("newpass", new Password(DBuser.getId()));
-        return "welcome";
+        return enter(m, DBuser, request);
+    }
+
+    @PostMapping("/clear")
+    public String clearIpLoginTable(Password p, Model m, HttpServletRequest request) {
+        iplRepo.deleteAll();
+        User u = userRepo.findByIdAlt(p.getId_user());
+        return enter(m, u, request);
     }
 
 }

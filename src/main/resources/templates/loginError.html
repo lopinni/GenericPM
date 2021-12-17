@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <html>
 <head>
     <title> GenericPM </title>
@@ -17,7 +18,38 @@
 </div>
 <div class='column'>
     <div class='text-center'>
-        <a href='./'> Return to home page </a></div>
+        <p> You've failed to login <b th:text="${numberOfFails}"> </b> times to this account </p>
+        <p> You've failed to login <b th:text="${numberOfFailsIP}"> </b> times overall </p>
+        <div id="timerdiv"> You will be able to login again after <p id="timer"> </p> </div>
+        <div id="link"> </div>
+    </div>
 </div>
+
+<script>
+    var fails = [[${numberOfFails}]];
+    var failsIP = [[${numberOfFailsIP}]];
+    var countDownDate = new Date();
+
+    if (fails == 3)     countDownDate = new Date(countDownDate.getTime() + 5000);
+    if (fails == 4)     countDownDate = new Date(countDownDate.getTime() + 10000);
+    if (fails == 5)     countDownDate = new Date(countDownDate.getTime() + 120000);
+    if (fails > 9)      countDownDate = new Date(countDownDate.getTime() + 600000);
+    if (failsIP > 19)   countDownDate = new Date(countDownDate.getTime() + 1800000);
+
+    var x = setInterval(function() {
+        var distance = countDownDate - new Date().getTime();
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("timer").innerHTML = minutes + " m " + seconds + " s";
+
+        if (distance < 0) {
+            clearInterval(x);
+            document.getElementById("timerdiv").innerHTML = "";
+            document.getElementById("link").innerHTML = "<a href='./'> Return to home page </a>";
+        }
+    }, 1000);
+</script>
+
 </body>
 </html>
