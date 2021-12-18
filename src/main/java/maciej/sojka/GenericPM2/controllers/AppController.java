@@ -115,8 +115,6 @@ public class AppController {
             }
             if(!formPass.equals(DBuser.getAcc_pass())) return loginError(m, u.getLogin(), request);
         } else return loginError(m, u.getLogin(), request);
-        ulRepo.save(new UserLogin(u.getLogin(),true));
-        iplRepo.save(new IPLogin(request.getRemoteAddr(),true));
         return enter(m, DBuser, request);
     }
 
