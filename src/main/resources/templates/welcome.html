@@ -1,9 +1,23 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head><title> GenericPM passwords </title>
     <link rel='stylesheet' href='css/spectre.min.css'>
 </head>
 <body>
+    <header class="navbar">
+        <section class="navbar-section"> </section>
+        <section class="navbar-center">
+            <div class="btn-group btn-group-block" style="padding-top: 10px">
+                <button class="btn btn-success" id="modeToggle" onClick="emToggle();"> Edit mode off </button>
+                <form th:action="@{/clear}" th:object="${newpass}" method="post">
+                    <input type='hidden' th:field="*{id_user}">
+                    <input class='btn' type='submit' value='Reset IP login table'>
+                </form>
+                <a href='./' class="btn"> Return to home page </a>
+            </div>
+        </section>
+        <section class="navbar-section"> </section>
+    </header>
     <div class='text-center'>
         <div class="columns">
             <div class='column'>
@@ -12,16 +26,22 @@
                     <div class='form-group'>
                         <div class='columns'>
                             <div class='column col-4'>
-                                <label class='form-label form-inline' for='add-webpage'> Webpage </label>
-                                <input class='form-input form-inline' type='text' id='add-webpage' th:field="*{site}">
+                                <label class='form-label form-inline'
+                                       for='add-webpage'> Webpage </label>
+                                <input class='form-input form-inline'
+                                       type='text' id='add-webpage' th:field="*{site}">
                             </div>
                             <div class='column col-4'>
-                                <label class='form-label form-inline' for='add-username'> Username </label>
-                                <input class='form-input form-inline' type='text' id='add-username' th:field="*{site_login}">
+                                <label class='form-label form-inline'
+                                       for='add-username'> Username </label>
+                                <input class='form-input form-inline'
+                                       type='text' id='add-username' th:field="*{site_login}">
                             </div>
                             <div class='column col-4'>
-                                <label class='form-label form-inline' for='add-password'> Password </label>
-                                <input class='form-input form-inline' type='password' id='add-password' th:field="*{site_pass}">
+                                <label class='form-label form-inline'
+                                       for='add-password'> Password </label>
+                                <input class='form-input form-inline'
+                                       type='password' id='add-password' th:field="*{site_pass}">
                             </div>
                         </div>
                         <input type='hidden' name='id' th:field="*{id_user}">
@@ -32,31 +52,75 @@
                 <div style='padding-top: 10px'> <h2> Stored passwords </h2> </div>
                 <table class='table table-striped table-hover'>
                     <thead>
-                    <tr class='active'>
-                        <th> Web address </th>
-                        <th> Login </th>
-                        <th> Password </th>
-                    </tr>
+                        <tr class='active'>
+                            <th> Web address </th>
+                            <th> Login </th>
+                            <th> Password </th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="pass : ${passwords}">
-                        <tr>
-                            <td th:text="${pass.site}"></td>
-                            <td th:text="${pass.site_login}"></td>
-                            <td>
-                                <div class='popover popover-right'>
-                                    <button class='btn btn-primary'> View</button>
-                                    <div class='popover-container'>
-                                        <div class='card'>
-                                            <div class='card-body'>
-                                                <p th:text="${pass.site_pass}"> </p>
+                        <th:block th:each="pass : ${passwords}">
+                            <tr>
+                                <td th:text="${pass.site}"></td>
+                                <td th:text="${pass.site_login}"></td>
+                                <td> <div class='popover popover-right'>
+                                    <button class='btn btn-primary'> View </button>
+                                    <div class='popover-container'> <div class='card'>
+                                        <div class='card-body'> <div class='columns'>
+                                            <div class='column col-3'> <p th:text="${pass.site_pass}"> </p> </div>
+                                            <div class='column col-9'>
+                                                <div id="editModeContentOff">
+                                                    <form th:action="@{/share}" th:object="${newshare}" method="post">
+                                                        <input type='hidden' name="idSharedUser"
+                                                               th:value="${pass.id_user}">
+                                                        <input type='hidden' name="idSharedPass"
+                                                               th:value="${pass.id}">
+                                                        <div class='columns'> <div class='column'>
+                                                            <input class='form-input' type='text'
+                                                                   th:field="*{benefactor}"
+                                                                   placeholder="Share with user">
+                                                        </div> <div class='column'>
+                                                            <input class='btn' type='submit' value='Share'>
+                                                        </div> </div>
+                                                    </form>
+                                                </div>
+                                                <div id="editModeContentOn">
+                                                    <div class="btn-group btn-group-block">
+                                                        <button class='btn btn-primary'> Edit </button>
+                                                        <button class='btn btn-error'> Delete </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
+                                        </div> </div>
+                                    </div> </div>
+                                </div> </td>
+                            </tr>
+                        </th:block>
+                    </tbody>
+                </table>
+                <div class="divider text-center"> </div>
+                <div style='padding-top: 10px'> <h2> Shared passwords </h2> </div>
+                <table class='table table-striped table-hover'>
+                    <thead>
+                        <tr class='active'>
+                            <th> Web address </th>
+                            <th> Login </th>
+                            <th> Password </th>
                         </tr>
-                    </th:block>
+                    </thead>
+                    <tbody>
+                        <th:block th:each="spass : ${sharedPasswords}">
+                            <tr>
+                                <td th:text="${spass.site}"></td>
+                                <td th:text="${spass.site_login}"></td>
+                                <td> <div class="popover popover-right">
+                                    <button class="btn btn-primary"> View </button>
+                                    <div class="popover-container"> <div class="card"> <div class="card-body">
+                                        <p th:text="${spass.site_pass}"> </p>
+                                    </div> </div> </div>
+                                </div> </td>
+                            </tr>
+                        </th:block>
                     </tbody>
                 </table>
             </div>
@@ -65,50 +129,61 @@
                 <div style='padding-top: 10px'> <h2> Account login attempts </h2> </div>
                 <table class='table table-striped table-hover'>
                     <thead>
-                    <tr class='active'>
-                        <th> Last successful login </th>
-                        <th> Last failed login </th>
-                        <th> Failed logins so far </th>
-                    </tr>
+                        <tr class='active'>
+                            <th> Last successful login </th>
+                            <th> Last failed login </th>
+                            <th> Failed logins so far </th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td th:text="${lastSuccess}"></td>
-                        <td th:text="${lastFail}"></td>
-                        <td th:text="${numberOfFails}"></td>
-                    </tr>
+                        <tr>
+                            <td th:text="${lastSuccess}"></td>
+                            <td th:text="${lastFail}"></td>
+                            <td th:text="${numberOfFails}"></td>
+                        </tr>
                     </tbody>
                 </table>
                 <div class="divider text-center"> </div>
                 <div style='padding-top: 10px'> <h2> IP login attempts </h2> </div>
                 <table class='table table-striped table-hover'>
                     <thead>
-                    <tr class='active'>
-                        <th> IP address </th>
-                        <th> Date of attempt </th>
-                        <th> Success </th>
-                    </tr>
+                        <tr class='active'>
+                            <th> IP address </th>
+                            <th> Date of attempt </th>
+                            <th> Success </th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <th:block th:each="log : ${ipLoginAttempts}">
-                        <tr>
-                            <td th:text="${log.ip}"></td>
-                            <td th:text="${log.log_date}"></td>
-                            <td th:text="${log.valid}"></td>
-                        </tr>
-                    </th:block>
+                        <th:block th:each="log : ${ipLoginAttempts}">
+                            <tr>
+                                <td th:text="${log.ip}"></td>
+                                <td th:text="${log.log_date}"></td>
+                                <td th:text="${log.valid}"></td>
+                            </tr>
+                        </th:block>
                     </tbody>
                 </table>
             </div>
         </div>
-        <form th:action="@{/clear}" th:object="${newpass}" method="post">
-            <input type='hidden' name='id' th:field="*{site}" value="">
-            <input type='hidden' name='id' th:field="*{site_login}" value="">
-            <input type='hidden' name='id' th:field="*{site_pass}" value="">
-            <input type='hidden' name='id' th:field="*{id_user}">
-            <div style='padding-top: 10px;'> <input class='btn' type='submit' value='Reset IP login table'> </div>
-        </form>
-        <div style='padding-top: 10px;'> <a href='./'> Return to home page </a> </div>
     </div>
+    <script>
+        const toggleButton = document.getElementById("modeToggle");
+        const shareModeArea = document.getElementById("editModeContentOff");
+        const editModeArea = document.getElementById("editModeContentOn");
+
+        editModeArea.style.display = "none";
+
+        function emToggle() {
+            toggleButton.firstChild.data =
+                toggleButton.firstChild.data == " Edit mode on " ? " Edit mode off " : " Edit mode on ";
+            if (shareModeArea.style.display === "none") {
+                shareModeArea.style.display = "block";
+                editModeArea.style.display = "none";
+            } else {
+                shareModeArea.style.display = "none";
+                editModeArea.style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>

@@ -11,4 +11,7 @@ public interface PassRepo extends JpaRepository<Password, Long> {
     @Query("SELECT p FROM Password p WHERE p.id_user = ?1")
     List<Password> findAllByUserId(Long uid);
 
+    @Query("SELECT p FROM Password p WHERE p.id = ?1")
+    List<Password> findAllById(Long id);
+
 }

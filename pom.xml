@@ -5,12 +5,11 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>2.6.2</version>
 	</parent>
 	<groupId>maciej.sojka</groupId>
 	<artifactId>GenericPM2</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>2</version>
 	<name>GenericPM2</name>
 	<description>Generic password manager</description>
 	<properties>

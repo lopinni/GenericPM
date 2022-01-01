@@ -27,16 +27,24 @@ public class GenericPm2Application {
 
 	@PostConstruct
 	public void init() throws Exception {
-		String salt = RandomString.make(64);
+		String salt1 = RandomString.make(64);
+		String salt2 = RandomString.make(64);
 		repo.save(new User(
 				"lopinni",
-				CryptoFunc.encrypt(
-							CryptoFunc.calculateSHA512("lopinni" + salt),
-							CryptoFunc.generateKey(CryptoFunc.PEPPER)),
-				salt,
+				CryptoFunc.encrypt(CryptoFunc.calculateSHA512("lopinni" + salt1),
+									CryptoFunc.generateKey(CryptoFunc.PEPPER)),
+				salt1,
 				"aes"
 		));
 		repo2.save(new Password(1L, "1", "1", "1"));
+		repo.save(new User(
+				"user1",
+				CryptoFunc.encrypt(CryptoFunc.calculateSHA512("user1" + salt2),
+									CryptoFunc.generateKey(CryptoFunc.PEPPER)),
+				salt2,
+				"aes"
+		));
+		repo2.save(new Password(2L, "2", "2", "2"));
 	}
 
 }
